@@ -1,0 +1,44 @@
+# CyberGuard AI — Backend Dependencies
+# Compatible with Python 3.12+ and 3.14+
+
+# Web Framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# Database
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10
+
+# Data Validation
+pydantic==2.10.6
+pydantic-settings==2.7.1
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.2.1
+
+# Email
+# smtplib is built-in to Python — no additional package needed
+
+# HTTP Client (for GeoIP)
+httpx==0.28.1
+
+# Machine Learning
+numpy==2.2.3
+pandas==2.2.3
+scikit-learn==1.6.1
+joblib==1.4.2
+
+# XGBoost — may not have Python 3.14 wheels yet, use pre-release or skip
+# xgboost==2.1.3  # Uncomment if your Python version is supported
+
+# Rate Limiting
+slowapi==0.1.9
+
+# Environment
+python-dotenv==1.0.1
+
+# WebSockets (included in uvicorn[standard])
+websockets==14.1

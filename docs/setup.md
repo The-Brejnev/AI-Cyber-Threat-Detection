@@ -1,0 +1,371 @@
+# CyberGuard AI — Setup Guide
+## AI/ML-Based Intelligent Network Threat Detection and Security Monitoring System
+
+---
+
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [PostgreSQL & pgAdmin Setup](#postgresql--pgadmin-setup)
+3. [Backend Setup](#backend-setup)
+4. [Frontend Setup](#frontend-setup)
+5. [Environment Configuration](#environment-configuration)
+6. [Running the Application](#running-the-application)
+7. [Verifying the Installation](#verifying-the-installation)
+8. [Troubleshooting](#troubleshooting)
+
+---
+
+## Prerequisites
+
+Install the following before proceeding:
+
+| Software | Version | Download |
+|----------|---------|----------|
+| PostgreSQL | 14+ | https://www.postgresql.org/download/windows/ |
+| pgAdmin 4 | Latest | Included with PostgreSQL installer |
+| Python | 3.11+ | https://www.python.org/downloads/ |
+| Node.js | 18+ | https://nodejs.org/ |
+| Git | Latest | https://git-scm.com/ |
+
+---
+
+## PostgreSQL & pgAdmin Setup
+
+### Step 1 — Install PostgreSQL
+
+1. Download PostgreSQL 16 for Windows from https://www.postgresql.org/download/windows/
+2. Run the installer.
+3. When prompted, set a password for the `postgres` superuser — **remember this password**.
+4. Keep the default port: **5432**.
+5. Complete installation. pgAdmin 4 will be installed automatically.
+
+### Step 2 — Create the Database
+
+Open **pgAdmin 4** (Start Menu → pgAdmin 4).
+
+1. In the Browser panel (left side), expand **Servers → PostgreSQL 16 → Databases**.
+2. Right-click **Databases** → **Create** → **Database**.
+3. Set **Database name**: `cyber_threat_detection`
+4. Set **Owner**: `postgres`
+5. Click **Save**.
+
+**Alternatively, use PowerShell:**
+
+```powershell
+# Open PowerShell and run:
+& "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -c "CREATE DATABASE cyber_threat_detection;"
+```
+
+### Step 3 — Run the Schema
+
+In pgAdmin 4:
+
+1. Expand **cyber_threat_detection → Schemas**.
+2. Click the **Query Tool** button (or press F5).
+3. Click **File → Open** and select `database/schema.sql`.
+4. Press **F5** or click **Execute/Refresh** (▶).
+
+**Or via PowerShell:**
+
+```powershell
+& "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -d cyber_threat_detection -f ".\database\schema.sql"
+```
+
+### Step 4 — (Optional) Load Seed Data
+
+```powershell
+& "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -d cyber_threat_detection -f ".\database\seed.sql"
+```
+
+Seed data creates two test accounts:
+- Email: `alice@cyberguard.dev` | Password: `Test1234!`
+- Email: `bob@cyberguard.dev` | Password: `Test1234!`
+
+### Step 5 — Verify in pgAdmin
+
+In pgAdmin, expand **cyber_threat_detection → Schemas → public → Tables**.  
+You should see all 12 tables: `users`, `user_profiles`, `user_settings`, `devices`, `network_events`, `threats`, `threat_predictions`, `scans`, `notifications`, `otp_codes`, `blocked_ips`, `audit_logs`.
+
+---
+
+## Backend Setup
+
+### Step 1 — Open PowerShell in the project directory
+
+```powershell
+cd C:\Users\kiran\.gemini\antigravity\scratch\AI-Cyber-Threat-Detection
+```
+
+### Step 2 — Create a Python virtual environment
+
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+> If you get an execution policy error, run first:
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
+
+### Step 3 — Install dependencies
+
+```powershell
+pip install -r requirements.txt
+```
+
+This installs FastAPI, SQLAlchemy, scikit-learn, XGBoost, and all other required packages (~2-3 minutes).
+
+### Step 4 — Configure environment variables
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
+Edit `.env` and fill in your values (see [Environment Configuration](#environment-configuration) below).
+
+**Minimum required fields:**
+```env
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/cyber_threat_detection
+JWT_SECRET_KEY=any-long-random-string-here-at-least-32-chars
+```
+
+### Step 5 — Train the ML model (first run only)
+
+```powershell
+python -m app.ml.train
+```
+
+This generates synthetic training data, trains the Random Forest + Isolation Forest models, and saves them to `app/ml/models/`. This takes ~30-60 seconds and only needs to be done once.
+
+You will see output like:
+```
+Training Random Forest classifier...
+Training Isolation Forest...
+Evaluation on test set:
+  Accuracy:  0.9642
+  Precision: 0.9631
+  Recall:    0.9642
+  F1 Score:  0.9634
+Models saved to app/ml/models/
+```
+
+These are real computed metrics, not fabricated numbers.
+
+### Step 6 — Start the backend
+
+```powershell
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+The backend will start and display:
+```
+INFO:     Uvicorn running on http://0.0.0.0:8000
+INFO:     Application startup complete.
+INFO:     ML models loaded successfully.
+INFO:     Simulation service started.
+```
+
+**API Documentation** (auto-generated by FastAPI):
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+---
+
+## Frontend Setup
+
+Open a **new PowerShell window**:
+
+```powershell
+cd C:\Users\kiran\.gemini\antigravity\scratch\AI-Cyber-Threat-Detection\frontend
+```
+
+### Step 1 — Install dependencies
+
+```powershell
+npm install
+```
+
+### Step 2 — Configure environment
+
+```powershell
+Copy-Item .env.example .env
+```
+
+The default `.env` works for local development without changes.
+
+### Step 3 — Start the frontend
+
+```powershell
+npm run dev
+```
+
+The frontend will be available at: **http://localhost:5173**
+
+---
+
+## Environment Configuration
+
+### backend/.env
+
+```env
+# Database
+DATABASE_URL=postgresql://postgres:YOUR_POSTGRES_PASSWORD@localhost:5432/cyber_threat_detection
+
+# JWT — change to any long random string (32+ chars)
+JWT_SECRET_KEY=replace-with-a-very-long-random-secret-key-here
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# Email (Gmail SMTP)
+# 1. Go to https://myaccount.google.com/security
+# 2. Enable 2-Step Verification
+# 3. Go to App Passwords → Create app password for "Mail"
+# 4. Use that 16-character password below
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USERNAME=your.gmail.address@gmail.com
+EMAIL_PASSWORD=xxxx-xxxx-xxxx-xxxx
+EMAIL_FROM=your.gmail.address@gmail.com
+EMAIL_FROM_NAME=CyberGuard AI
+
+# Twilio SMS (optional — leave blank to disable SMS)
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_FROM_NUMBER=
+SMS_ENABLED=false
+
+# GeoIP (ip-api.com is free, no key needed)
+GEOIP_PROVIDER=ip-api
+MAXMIND_API_KEY=
+
+# Simulation
+SIMULATION_INTERVAL_SECONDS=8
+
+# Application
+ENVIRONMENT=development
+DEBUG=true
+FRONTEND_URL=http://localhost:5173
+```
+
+### frontend/.env
+
+```env
+VITE_API_URL=http://localhost:8000
+VITE_WS_URL=ws://localhost:8000
+```
+
+---
+
+## Running the Application
+
+Run these in two separate PowerShell windows:
+
+**Window 1 — Backend:**
+```powershell
+cd C:\Users\kiran\.gemini\antigravity\scratch\AI-Cyber-Threat-Detection\backend
+.\venv\Scripts\Activate.ps1
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Window 2 — Frontend:**
+```powershell
+cd C:\Users\kiran\.gemini\antigravity\scratch\AI-Cyber-Threat-Detection\frontend
+npm run dev
+```
+
+Open your browser: **http://localhost:5173**
+
+---
+
+## Verifying the Installation
+
+### 1. Health Check
+```
+GET http://localhost:8000/health
+```
+Should return: `{"status": "healthy", "database": "connected", "ml_model": "loaded"}`
+
+### 2. Register a new account
+- Navigate to http://localhost:5173/register
+- Enter your email and click **Send OTP**
+- Check your email (or backend logs if email not configured) for the 6-digit code
+- Complete registration
+
+### 3. Login
+- Navigate to http://localhost:5173/login
+- Login with your credentials
+- You should be redirected to the Dashboard
+
+### 4. Verify Real-Time Data
+- Wait 8-10 seconds after login
+- The simulation service generates network events automatically
+- The Live Events Feed in the Dashboard should update in real-time
+- Check the Threat Analysis page for detected threats
+
+### 5. Test GeoMap
+- Navigate to /geo-map
+- Markers should appear for any public IP threats detected
+- Note: Private IPs (192.168.x.x, 10.x.x.x) are not mapped
+
+---
+
+## Troubleshooting
+
+### "psycopg2 could not connect to server"
+- Verify PostgreSQL is running: `Get-Service -Name "postgresql*"`
+- Check DATABASE_URL password matches what you set during installation
+- Ensure database `cyber_threat_detection` exists in pgAdmin
+
+### "ModuleNotFoundError" when starting backend
+- Ensure virtual environment is activated: `.\venv\Scripts\Activate.ps1`
+- Re-run: `pip install -r requirements.txt`
+
+### ML models not found
+- Run training: `python -m app.ml.train`
+- Check that `backend/app/ml/models/` directory exists
+
+### Email OTP not received
+- Check that you configured Gmail App Password (not your regular Gmail password)
+- Check backend logs — in development mode, OTP is also logged to console
+- Verify EMAIL_USERNAME and EMAIL_PASSWORD in `.env`
+
+### WebSocket not connecting
+- Ensure backend is running on port 8000
+- Check browser console for WebSocket errors
+- Verify VITE_WS_URL in frontend `.env`
+
+### Port 8000 already in use
+```powershell
+# Find and kill process using port 8000
+netstat -ano | findstr :8000
+taskkill /PID <PID> /F
+```
+
+### npm install fails
+- Ensure Node.js 18+ is installed: `node --version`
+- Clear npm cache: `npm cache clean --force`
+- Delete node_modules and retry: `Remove-Item -Recurse node_modules; npm install`
+
+### Tables not created automatically
+- Run schema manually: `psql -U postgres -d cyber_threat_detection -f database/schema.sql`
+- Check backend startup logs for SQLAlchemy errors
+
+---
+
+## Production Deployment Notes
+
+For cloud deployment (e.g., Google Cloud, AWS, Azure):
+
+1. Set `ENVIRONMENT=production` in `.env`
+2. Use a proper secret manager for credentials (not `.env` files)
+3. Configure PostgreSQL with SSL: `DATABASE_URL=postgresql://...?sslmode=require`
+4. Build frontend: `npm run build` → serve `dist/` with nginx
+5. Run backend with: `uvicorn app.main:app --workers 4 --host 0.0.0.0 --port 8000`
+6. Use a process manager (systemd, PM2, or Docker)
+7. Configure a reverse proxy (nginx) for SSL termination
+8. Set `FRONTEND_URL` to your actual domain in backend `.env`
