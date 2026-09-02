@@ -6,32 +6,32 @@
 ┌──────────────────────────────────────────────────────────────────┐
 │                         USER BROWSER                             │
 │                                                                  │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
-│  │  React SPA   │  │  WebSocket   │  │   Leaflet GeoMap     │   │
-│  │  (Vite)      │  │  Client      │  │                      │   │
-│  └──────┬───────┘  └──────┬───────┘  └──────────────────────┘   │
-└─────────┼────────────────┼──────────────────────────────────────┘
+│  ┌──────────── ─┐  ┌──────────────┐  ┌──────────────────────┐    │
+│  │  React SPA   │  │  WebSocket   │  │   Leaflet GeoMap     │    │
+│  │  (Vite)      │  │  Client      │  │                      │    │
+│  └──────┬───────┘  └──────┬───────┘  └──────────────────────┘    │
+└─────────┼──────────────── ┼──────────────────────────────────────┘
           │ HTTP/REST       │ WebSocket
           ▼                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     FASTAPI BACKEND (Port 8000)                  │
-│                                                                  │
+│                     FASTAPI BACKEND (Port 8000)                 │
+│                                                                 │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │                      ROUTERS                              │   │
-│  │  /auth  /dashboard  /threats  /devices  /analytics        │   │
-│  │  /geo   /notifications  /blocked-ips  /profile            │   │
-│  │  /settings  /ws (WebSocket)                               │   │
-│  └──────────────────┬───────────────┬────────────────────────┘   │
-│                     │               │                             │
-│  ┌──────────────────▼───┐  ┌────────▼──────────────────────┐   │
-│  │     SERVICES          │  │     ML ENGINE                  │   │
-│  │  - AuthService        │  │  - Random Forest Classifier    │   │
-│  │  - EmailService       │  │  - Isolation Forest            │   │
-│  │  - GeoService         │  │  - Feature Extraction          │   │
-│  │  - NotificationSvc    │  │  - Risk Scoring                │   │
-│  │  - AuditService       │  │  - 14 Threat Categories        │   │
-│  │  - SimulationService  │  └───────────────────────────────┘   │
-│  └──────────────────┬───┘                                       │
+│  │                      ROUTERS                             │   │
+│  │  /auth  /dashboard  /threats  /devices  /analytics       │   │
+│  │  /geo   /notifications  /blocked-ips  /profile           │   │
+│  │  /settings  /ws (WebSocket)                              │   │
+│  └──────────────────┬───────────────┬───────────────────────┘   │
+│                      │               │                           │
+│   ┌──────────────────▼───┐  ┌────────▼──────────────────────┐   │
+│   │     SERVICES         │  │     ML ENGINE                 │   │
+│   │  - AuthService       │  │  - Random Forest Classifier   │   │
+│   │  - EmailService      │  │  - Isolation Forest           │   │
+│   │  - GeoService        │  │  - Feature Extraction         │   │
+│   │  - NotificationSvc   │  │  - Risk Scoring               │   │
+│   │  - AuditService      │  │  - 14 Threat Categories       │   │
+│   │  - SimulationService │  └───────────────────────────────┘   │
+│   └──────────────────┬───┘                                       │
 │                     │                                            │
 │  ┌──────────────────▼───────────────────────────────────────┐   │
 │  │              WebSocket Manager                            │   │
