@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from jose import jwt, JWTError
+from jose import JWTError, jwt  # type: ignore[reportMissingImports]
 from typing import Optional, Dict
 from app.config import settings
 
